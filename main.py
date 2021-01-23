@@ -77,10 +77,7 @@ for file in os.listdir(IMAGE_DIRECTORY):
     if not file.startswith('.'):
         images.append(get_image(os.path.join(IMAGE_DIRECTORY, file)))
 
-plt.figure(figsize=(20, 100))
-for i in range(len(images)):
-    plt.subplot(1, 50, i+1)
-    plt.imshow(images[i])
+
 
 # Search for GREEN
 plt.figure(figsize = (20, 10))
