@@ -1,4 +1,3 @@
-#%%
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,6 +6,7 @@ from collections import Counter
 from skimage.color import rgb2lab, deltaE_cie76
 import os
 
+clustered_images = {}
 
 def RGB2HEX(color):
     return "#{:02x}{:02x}{:02x}".format(int(color[0]), int(color[1]), int(color[2]))
@@ -39,7 +39,7 @@ def get_colors(image, number_of_colors, show_chart):
     
     return rgb_colors
 
-def match_image_by_color(image, color, threshold = 60, number_of_colors = 10): 
+def match_image_by_color(image, color, threshold = 60, number_of_colors = 5): 
     
     image_colors = get_colors(image, number_of_colors, False)
     selected_color = rgb2lab(np.uint8(np.asarray([[color]])))
@@ -53,35 +53,37 @@ def match_image_by_color(image, color, threshold = 60, number_of_colors = 10):
             select_image = True
     return select_image
 
-def show_selected_images(images, color, threshold, colors_to_match):
+def show_selected_images(images, label, color, threshold, colors_to_match):
     index = 1
-    for i in range(len(images)):
-        selected = match_image_by_color(images[i],
+    for key in images:
+        selected = match_image_by_color(images[key],
                                         color,
                                         threshold,
                                         colors_to_match)
-        if (selected):
-            plt.subplot(1, 50, index)
-            plt.imshow(images[i])
-            index += 1
+        if selected:
+            if label in clustered_images:
+                clustered_images[label].append(key)
+            else:
+                clustered_images[label] = []
+                clustered_images[label].append(key)
 
 IMAGE_DIRECTORY = 'data/'
 COLORS = {
     'GREEN': [0, 128, 0],
     'BLUE': [0, 0, 128],
-    'YELLOW': [255, 255, 0]
+    'YELLOW': [255, 255, 0],
+    'RED': [255,0,0],
+    'WHITE': [255,255,255]
 }
-images = []
+images = {}
 
 for file in os.listdir(IMAGE_DIRECTORY):
     if not file.startswith('.'):
-        images.append(get_image(os.path.join(IMAGE_DIRECTORY, file)))
+        images[file] = get_image(os.path.join(IMAGE_DIRECTORY, file))
 
 
 
 # Search for GREEN
-plt.figure(figsize = (20, 10))
-show_selected_images(images, COLORS['GREEN'], 60, 5)
-
-
-# %%
+for key in COLORS:
+    show_selected_images(images, key, COLORS[key], 60, 5)
+print(clustered_images)
